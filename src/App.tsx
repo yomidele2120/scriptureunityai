@@ -28,6 +28,7 @@ const App = () => (
           <Route path="/topics/:topicId" element={<TopicsPage />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/understanding" element={<UnderstandingPage />} />
+          <Route path="/admin/import" element={<AdminImport />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
