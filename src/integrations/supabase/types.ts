@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bible_verses: {
+        Row: {
+          book: string
+          canon_type: string
+          chapter: number
+          created_at: string
+          id: string
+          text: string
+          translation: string
+          verse: number
+        }
+        Insert: {
+          book: string
+          canon_type?: string
+          chapter: number
+          created_at?: string
+          id?: string
+          text: string
+          translation: string
+          verse: number
+        }
+        Update: {
+          book?: string
+          canon_type?: string
+          chapter?: number
+          created_at?: string
+          id?: string
+          text?: string
+          translation?: string
+          verse?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
