@@ -10,6 +10,7 @@ import TopicsPage from "./pages/TopicsPage";
 import ComparePage from "./pages/ComparePage";
 import UnderstandingPage from "./pages/UnderstandingPage";
 import NotFound from "./pages/NotFound";
+import AdminImport from "./pages/AdminImport";
 
 const queryClient = new QueryClient();
 
