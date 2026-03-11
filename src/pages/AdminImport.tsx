@@ -1,46 +1,49 @@
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// OSIS book ID to full name mapping
-const OSIS_BOOK_NAMES: Record<string, string> = {
-  Gen: 'Genesis', Exod: 'Exodus', Lev: 'Leviticus', Num: 'Numbers', Deut: 'Deuteronomy',
-  Josh: 'Joshua', Judg: 'Judges', Ruth: 'Ruth', '1Sam': '1 Samuel', '2Sam': '2 Samuel',
-  '1Kgs': '1 Kings', '2Kgs': '2 Kings', '1Chr': '1 Chronicles', '2Chr': '2 Chronicles',
-  Ezra: 'Ezra', Neh: 'Nehemiah', Esth: 'Esther', Job: 'Job', Ps: 'Psalms', Psa: 'Psalms',
-  Prov: 'Proverbs', Eccl: 'Ecclesiastes', Song: 'Song of Solomon', Isa: 'Isaiah',
-  Jer: 'Jeremiah', Lam: 'Lamentations', Ezek: 'Ezekiel', Dan: 'Daniel', Hos: 'Hosea',
-  Joel: 'Joel', Amos: 'Amos', Obad: 'Obadiah', Jonah: 'Jonah', Mic: 'Micah',
-  Nah: 'Nahum', Hab: 'Habakkuk', Zeph: 'Zephaniah', Hag: 'Haggai', Zech: 'Zechariah',
-  Mal: 'Malachi', Matt: 'Matthew', Mark: 'Mark', Luke: 'Luke', John: 'John',
-  Acts: 'Acts', Rom: 'Romans', '1Cor': '1 Corinthians', '2Cor': '2 Corinthians',
-  Gal: 'Galatians', Eph: 'Ephesians', Phil: 'Philippians', Col: 'Colossians',
-  '1Thess': '1 Thessalonians', '2Thess': '2 Thessalonians', '1Tim': '1 Timothy',
-  '2Tim': '2 Timothy', Titus: 'Titus', Phlm: 'Philemon', Heb: 'Hebrews',
-  Jas: 'James', '1Pet': '1 Peter', '2Pet': '2 Peter', '1John': '1 John',
-  '2John': '2 John', '3John': '3 John', Jude: 'Jude', Rev: 'Revelation',
-  // Deuterocanonical / Apocrypha
-  Tob: 'Tobit', Jdt: 'Judith', AddEsth: 'Additions to Esther', Wis: 'Wisdom of Solomon',
-  Sir: 'Sirach', Bar: 'Baruch', EpJer: 'Letter of Jeremiah', PrAzar: 'Prayer of Azariah',
-  Sus: 'Susanna', Bel: 'Bel and the Dragon', '1Macc': '1 Maccabees', '2Macc': '2 Maccabees',
-  '3Macc': '3 Maccabees', '4Macc': '4 Maccabees', '1Esd': '1 Esdras', '2Esd': '2 Esdras',
-  PrMan: 'Prayer of Manasseh', AddPs: 'Additional Psalms',
-  // Additional abbreviations
-  PSA: 'Psalms', GEN: 'Genesis', EXO: 'Exodus', LEV: 'Leviticus',
-  MRK: 'Mark', MRk: 'Mark', PHM: 'Philemon', Phm: 'Philemon',
-  SNG: 'Song of Solomon', LAM: 'Lamentations', OBA: 'Obadiah',
-  NAM: 'Nahum', HAB: 'Habakkuk', ZEP: 'Zephaniah', HAG: 'Haggai',
-  ZEC: 'Zechariah', MAL: 'Malachi', MAT: 'Matthew', LUK: 'Luke',
-  JHN: 'John', ACT: 'Acts', ROM: 'Romans', GAL: 'Galatians',
-  EPH: 'Ephesians', PHP: 'Philippians', COL: 'Colossians',
-  TIT: 'Titus', HEB: 'Hebrews', JAS: 'James', JDE: 'Jude',
-  REV: 'Revelation', EST: 'Esther', RUT: 'Ruth',
+const ABBREV_TO_BOOK: Record<string, string> = {
+  gn: 'Genesis', ex: 'Exodus', lv: 'Leviticus', nm: 'Numbers', dt: 'Deuteronomy',
+  js: 'Joshua', jg: 'Judges', rt: 'Ruth', '1sm': '1 Samuel', '2sm': '2 Samuel',
+  '1kn': '1 Kings', '2kn': '2 Kings', '1ch': '1 Chronicles', '2ch': '2 Chronicles',
+  er: 'Ezra', ne: 'Nehemiah', et: 'Esther', jb: 'Job', ps: 'Psalms',
+  pr: 'Proverbs', ec: 'Ecclesiastes', ss: 'Song of Solomon', is: 'Isaiah',
+  jr: 'Jeremiah', lm: 'Lamentations', ez: 'Ezekiel', dn: 'Daniel', hs: 'Hosea',
+  jl: 'Joel', am: 'Amos', ob: 'Obadiah', jn: 'Jonah', mc: 'Micah',
+  na: 'Nahum', hk: 'Habakkuk', zp: 'Zephaniah', hg: 'Haggai', zc: 'Zechariah',
+  ml: 'Malachi', mt: 'Matthew', mk: 'Mark', lk: 'Luke', jo: 'John',
+  ac: 'Acts', rm: 'Romans', '1co': '1 Corinthians', '2co': '2 Corinthians',
+  gl: 'Galatians', ep: 'Ephesians', pp: 'Philippians', cl: 'Colossians',
+  '1ts': '1 Thessalonians', '2ts': '2 Thessalonians', '1tm': '1 Timothy',
+  '2tm': '2 Timothy', tt: 'Titus', pm: 'Philemon', hb: 'Hebrews',
+  jm: 'James', '1pt': '1 Peter', '2pt': '2 Peter', '1jo': '1 John',
+  '2jo': '2 John', '3jo': '3 John', jd: 'Jude', rv: 'Revelation',
 };
 
-function getBookName(osisId: string): string {
-  return OSIS_BOOK_NAMES[osisId] || osisId;
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
 }
 
-interface ParsedVerse {
+interface BibleVerse {
   book: string;
   chapter: number;
   verse: number;
@@ -49,73 +52,124 @@ interface ParsedVerse {
   canon_type: string;
 }
 
-function parseOSIS(xmlText: string, translationName: string, canonType: string): ParsedVerse[] {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlText, 'text/xml');
-  const verses: ParsedVerse[] = [];
+interface QuranVerse {
+  surah_no: number;
+  surah_name_en: string;
+  surah_name_ar: string | null;
+  surah_name_roman: string | null;
+  ayah_no: number;
+  ayah_no_quran: number | null;
+  text_ar: string | null;
+  text_en: string;
+  juz_no: number | null;
+  place_of_revelation: string | null;
+}
+
+function parseBibleCSV(csvText: string): BibleVerse[] {
+  const lines = csvText.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
   
-  // Find all verse start elements with sID
-  const allVerseStarts = doc.querySelectorAll('verse[sID]');
+  const headers = parseCSVLine(lines[0]);
+  // Parse chapter/verse structure from headers: chapters/X/Y
+  const chapterVerseMap: { colIdx: number; chapter: number; verse: number }[] = [];
   
-  allVerseStarts.forEach((verseStart) => {
-    const osisID = verseStart.getAttribute('osisID') || verseStart.getAttribute('sID') || '';
-    const parts = osisID.split('.');
-    if (parts.length < 3) return;
-    
-    const bookId = parts[0];
-    const chapter = parseInt(parts[1], 10);
-    const verseNum = parseInt(parts[2], 10);
-    
-    if (isNaN(chapter) || isNaN(verseNum)) return;
-    
-    // Collect text between sID and eID
-    let textContent = '';
-    let node: Node | null = verseStart.nextSibling;
-    const eID = verseStart.getAttribute('sID');
-    
-    while (node) {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        if (el.tagName === 'verse' && el.getAttribute('eID')) {
-          break;
-        }
-        // Get text content from child elements (skip tags like <transChange>, <divineName>, etc.)
-        textContent += el.textContent || '';
-      } else if (node.nodeType === Node.TEXT_NODE) {
-        textContent += node.textContent || '';
-      }
-      node = node.nextSibling;
+  headers.forEach((h, idx) => {
+    const match = h.match(/^chapters\/(\d+)\/(\d+)$/);
+    if (match) {
+      chapterVerseMap.push({
+        colIdx: idx,
+        chapter: parseInt(match[1]) + 1, // 0-based to 1-based
+        verse: parseInt(match[2]) + 1,
+      });
     }
-    
-    const cleanText = textContent.replace(/\s+/g, ' ').trim();
-    if (!cleanText) return;
-    
-    verses.push({
-      book: getBookName(bookId),
-      chapter,
-      verse: verseNum,
-      text: cleanText,
-      translation: translationName,
-      canon_type: canonType,
-    });
   });
+
+  const verses: BibleVerse[] = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const abbrev = cols[0]?.toLowerCase()?.trim();
+    if (!abbrev) continue;
+    
+    const bookName = ABBREV_TO_BOOK[abbrev] || abbrev;
+    
+    for (const cv of chapterVerseMap) {
+      const text = cols[cv.colIdx]?.trim();
+      if (text) {
+        verses.push({
+          book: bookName,
+          chapter: cv.chapter,
+          verse: cv.verse,
+          text,
+          translation: 'KJV',
+          canon_type: 'Protestant',
+        });
+      }
+    }
+  }
   
   return verses;
 }
+
+function parseQuranCSV(csvText: string): QuranVerse[] {
+  const lines = csvText.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  
+  const headers = parseCSVLine(lines[0]);
+  const getIdx = (name: string) => headers.findIndex(h => h.trim() === name);
+  
+  const surahNoIdx = getIdx('surah_no');
+  const surahNameEnIdx = getIdx('surah_name_en');
+  const surahNameArIdx = getIdx('surah_name_ar');
+  const surahNameRomanIdx = getIdx('surah_name_roman');
+  const ayahNoSurahIdx = getIdx('ayah_no_surah');
+  const ayahNoQuranIdx = getIdx('ayah_no_quran');
+  const ayahArIdx = getIdx('ayah_ar');
+  const ayahEnIdx = getIdx('ayah_en');
+  const juzNoIdx = getIdx('juz_no');
+  const placeIdx = getIdx('place_of_revelation');
+
+  const verses: QuranVerse[] = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const surahNo = parseInt(cols[surahNoIdx]);
+    const ayahNo = parseInt(cols[ayahNoSurahIdx]);
+    const textEn = cols[ayahEnIdx]?.trim();
+    
+    if (isNaN(surahNo) || isNaN(ayahNo) || !textEn) continue;
+    
+    verses.push({
+      surah_no: surahNo,
+      surah_name_en: cols[surahNameEnIdx]?.trim() || '',
+      surah_name_ar: cols[surahNameArIdx]?.trim() || null,
+      surah_name_roman: cols[surahNameRomanIdx]?.trim() || null,
+      ayah_no: ayahNo,
+      ayah_no_quran: parseInt(cols[ayahNoQuranIdx]) || null,
+      text_ar: cols[ayahArIdx]?.trim() || null,
+      text_en: textEn,
+      juz_no: parseInt(cols[juzNoIdx]) || null,
+      place_of_revelation: cols[placeIdx]?.trim() || null,
+    });
+  }
+  
+  return verses;
+}
+
+type ImportType = 'bible' | 'quran';
 
 export default function AdminImport() {
   const [status, setStatus] = useState('');
   const [progress, setProgress] = useState(0);
   const [total, setTotal] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
+  const [importType, setImportType] = useState<ImportType>('bible');
   const fileRef = useRef<HTMLInputElement>(null);
-  const [translationName, setTranslationName] = useState('KJV');
-  const [canonType, setCanonType] = useState('Protestant');
 
   const handleImport = async () => {
     const file = fileRef.current?.files?.[0];
     if (!file) {
-      setStatus('Please select an XML file');
+      setStatus('Please select a CSV file');
       return;
     }
 
@@ -123,35 +177,63 @@ export default function AdminImport() {
     setStatus('Reading file...');
     
     try {
-      const xmlText = await file.text();
-      setStatus('Parsing OSIS XML...');
+      const csvText = await file.text();
       
-      const verses = parseOSIS(xmlText, translationName, canonType);
-      setTotal(verses.length);
-      setStatus(`Parsed ${verses.length} verses. Uploading...`);
+      if (importType === 'bible') {
+        setStatus('Parsing Bible CSV (flattening nested chapters)...');
+        const verses = parseBibleCSV(csvText);
+        setTotal(verses.length);
+        setStatus(`Parsed ${verses.length} Bible verses. Uploading...`);
 
-      // Send in batches of 1000 to edge function
-      const batchSize = 1000;
-      let uploaded = 0;
+        const batchSize = 1000;
+        let uploaded = 0;
 
-      for (let i = 0; i < verses.length; i += batchSize) {
-        const batch = verses.slice(i, i + batchSize);
-        const { data, error } = await supabase.functions.invoke('import-bible-verses', {
-          body: { verses: batch },
-        });
+        for (let i = 0; i < verses.length; i += batchSize) {
+          const batch = verses.slice(i, i + batchSize);
+          const { error } = await supabase.functions.invoke('import-bible-verses', {
+            body: { verses: batch },
+          });
 
-        if (error) {
-          setStatus(`Error at batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
-          setIsImporting(false);
-          return;
+          if (error) {
+            setStatus(`Error at batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
+            setIsImporting(false);
+            return;
+          }
+
+          uploaded += batch.length;
+          setProgress(uploaded);
+          setStatus(`Uploaded ${uploaded} / ${verses.length} Bible verses...`);
         }
 
-        uploaded += batch.length;
-        setProgress(uploaded);
-        setStatus(`Uploaded ${uploaded} / ${verses.length} verses...`);
-      }
+        setStatus(`✅ Bible import complete! ${uploaded} verses imported.`);
+      } else {
+        setStatus('Parsing Quran CSV...');
+        const verses = parseQuranCSV(csvText);
+        setTotal(verses.length);
+        setStatus(`Parsed ${verses.length} Quran verses. Uploading...`);
 
-      setStatus(`✅ Import complete! ${uploaded} verses imported for ${translationName}.`);
+        const batchSize = 1000;
+        let uploaded = 0;
+
+        for (let i = 0; i < verses.length; i += batchSize) {
+          const batch = verses.slice(i, i + batchSize);
+          const { error } = await supabase.functions.invoke('import-quran-verses', {
+            body: { verses: batch },
+          });
+
+          if (error) {
+            setStatus(`Error at batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
+            setIsImporting(false);
+            return;
+          }
+
+          uploaded += batch.length;
+          setProgress(uploaded);
+          setStatus(`Uploaded ${uploaded} / ${verses.length} Quran verses...`);
+        }
+
+        setStatus(`✅ Quran import complete! ${uploaded} verses imported.`);
+      }
     } catch (err: any) {
       setStatus(`Error: ${err.message}`);
     } finally {
@@ -162,46 +244,30 @@ export default function AdminImport() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-heading font-bold text-foreground mb-6">Bible Data Import</h1>
+        <h1 className="text-3xl font-heading font-bold text-foreground mb-6">Scripture Data Import</h1>
         <p className="text-muted-foreground mb-6">
-          Upload OSIS XML files to import Bible verses into the database.
+          Upload CSV files to import Bible or Quran verses into the database.
         </p>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Translation Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Dataset Type</label>
             <select
-              value={translationName}
-              onChange={(e) => setTranslationName(e.target.value)}
+              value={importType}
+              onChange={(e) => setImportType(e.target.value as ImportType)}
               className="w-full border border-border rounded-md p-2 bg-card text-foreground"
               disabled={isImporting}
             >
-              <option value="KJV">King James Version (KJV)</option>
-              <option value="OEB">Open English Bible (OEB)</option>
-              <option value="ASV">American Standard Version (ASV)</option>
-              <option value="WEB">World English Bible (WEB)</option>
+              <option value="bible">Bible (nested chapters CSV)</option>
+              <option value="quran">Quran (surah/ayah CSV)</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Canon Type</label>
-            <select
-              value={canonType}
-              onChange={(e) => setCanonType(e.target.value)}
-              className="w-full border border-border rounded-md p-2 bg-card text-foreground"
-              disabled={isImporting}
-            >
-              <option value="Protestant">Protestant</option>
-              <option value="Catholic">Catholic</option>
-              <option value="Orthodox">Orthodox</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">OSIS XML File</label>
+            <label className="block text-sm font-medium text-foreground mb-1">CSV File</label>
             <input
               type="file"
-              accept=".xml"
+              accept=".csv"
               ref={fileRef}
               className="w-full border border-border rounded-md p-2 bg-card text-foreground"
               disabled={isImporting}
