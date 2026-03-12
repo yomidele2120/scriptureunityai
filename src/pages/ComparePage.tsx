@@ -1,84 +1,138 @@
 import { useState } from 'react';
-import VerseCard from '@/components/VerseCard';
-import { sampleQuranVerses, sampleBibleVerses, sampleEthiopianVerses } from '@/data/mockScriptures';
+import { motion } from 'framer-motion';
+import AIResponse from '@/components/AIResponse';
+import { useAIStream } from '@/hooks/useAIStream';
 
-const scriptureOptions = [
-  { value: 'bible', label: 'Bible' },
-  { value: 'ethiopian', label: 'Ethiopian Bible' },
-  { value: 'quran', label: "Qur'an" },
-] as const;
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const quickCompare = [
+  'Bible vs Quran',
+  'Christianity vs Islam vs Judaism',
+  'Jesus in Christianity vs Islam vs Judaism',
+  'Concept of God across religions',
+  'Salvation in Christianity vs Islam',
+  'Prayer in Christianity vs Islam vs Judaism',
+  'Fasting in Christianity vs Islam',
+  'Trinity vs Tawhid',
+  'Prophets in Christianity vs Islam',
+  'Afterlife beliefs across religions',
+];
+
+const debateQuestions = [
+  'Is Jesus God?',
+  'Do Jews believe Jesus is the Messiah?',
+  'Was Jesus crucified?',
+  'Which religion came first?',
+  'What is the difference between Trinity and Tawhid?',
+  'Is the Bible or Quran more historically accurate?',
+  'Do all religions worship the same God?',
+];
 
 export default function ComparePage() {
-  const [leftSource, setLeftSource] = useState<string>('bible');
-  const [rightSource, setRightSource] = useState<string>('quran');
+  const { response, isLoading, error, query: aiQuery } = useAIStream();
+  const [activeQuery, setActiveQuery] = useState<string | null>(null);
+  const [customQuery, setCustomQuery] = useState('');
 
-  function getVerses(source: string) {
-    switch (source) {
-      case 'quran': return sampleQuranVerses.map(v => ({ type: 'quran' as const, verse: v }));
-      case 'bible': return sampleBibleVerses.map(v => ({ type: 'bible' as const, verse: v }));
-      case 'ethiopian': return sampleEthiopianVerses.map(v => ({ type: 'ethiopian' as const, verse: v }));
-      default: return [];
+  const handleCompare = (q: string) => {
+    setActiveQuery(q);
+    aiQuery({ query: q, mode: 'compare' });
+  };
+
+  const handleDebate = (q: string) => {
+    setActiveQuery(q);
+    aiQuery({ query: q, mode: 'debate' });
+  };
+
+  const handleCustom = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customQuery.trim()) {
+      handleCompare(customQuery.trim());
     }
-  }
+  };
 
   return (
     <div className="min-h-screen py-8">
-      <div className="container max-w-6xl">
-        <h1 className="font-heading text-3xl font-bold text-foreground mb-2 text-center">
-          Compare Scriptures
-        </h1>
-        <p className="text-muted-foreground text-center mb-8">
-          View verses side-by-side across different traditions
-        </p>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Left column */}
-          <div>
-            <select
-              value={leftSource}
-              onChange={(e) => setLeftSource(e.target.value)}
-              className="w-full mb-4 bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
-            >
-              {scriptureOptions.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-            <div className="space-y-3">
-              {getVerses(leftSource).slice(0, 3).map((data, i) => (
-                <VerseCard key={i} data={data} />
-              ))}
-            </div>
-          </div>
-
-          {/* Right column */}
-          <div>
-            <select
-              value={rightSource}
-              onChange={(e) => setRightSource(e.target.value)}
-              className="w-full mb-4 bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
-            >
-              {scriptureOptions.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-            <div className="space-y-3">
-              {getVerses(rightSource).slice(0, 3).map((data, i) => (
-                <VerseCard key={i} data={data} />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-lg p-5 mt-8">
-          <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
-            🤖 AI Comparison Summary
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            When connected to the AI backend, this section will display a neutral, scholarly 
-            comparison summary highlighting shared themes and respectful differences between 
-            the selected scriptures.
+      <div className="container max-w-4xl">
+        <motion.div {...fadeUp} transition={{ duration: 0.5 }}>
+          <h1 className="font-heading text-3xl font-bold text-foreground mb-2 text-center">
+            Compare & Debate
+          </h1>
+          <p className="text-muted-foreground text-center mb-8">
+            AI-powered religious comparison and theological debate — click any topic or ask your own question
           </p>
+        </motion.div>
+
+        {/* Custom comparison input */}
+        <form onSubmit={handleCustom} className="mb-8">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={customQuery}
+              onChange={(e) => setCustomQuery(e.target.value)}
+              placeholder="Enter your own comparison or debate question..."
+              className="flex-1 bg-card border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !customQuery.trim()}
+              className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+            >
+              Compare
+            </button>
+          </div>
+        </form>
+
+        {/* Quick comparisons */}
+        <div className="mb-6">
+          <h2 className="font-heading text-lg font-semibold text-foreground mb-3">⚖️ Quick Comparisons</h2>
+          <div className="flex flex-wrap gap-2">
+            {quickCompare.map((q) => (
+              <button
+                key={q}
+                onClick={() => handleCompare(q)}
+                disabled={isLoading}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  activeQuery === q
+                    ? 'bg-accent text-accent-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-accent/20'
+                } disabled:opacity-50`}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Debate questions */}
+        <div className="mb-8">
+          <h2 className="font-heading text-lg font-semibold text-foreground mb-3">🔥 Debate Questions</h2>
+          <div className="flex flex-wrap gap-2">
+            {debateQuestions.map((q) => (
+              <button
+                key={q}
+                onClick={() => handleDebate(q)}
+                disabled={isLoading}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  activeQuery === q
+                    ? 'bg-accent text-accent-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-accent/20'
+                } disabled:opacity-50`}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <AIResponse
+          content={response}
+          isLoading={isLoading}
+          error={error}
+          placeholder="Click a comparison or debate topic above, or enter your own question to get a detailed AI analysis."
+        />
       </div>
     </div>
   );
