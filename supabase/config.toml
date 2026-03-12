@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.scripture-search]
 verify_jwt = false
+
+[functions.religious-ai]
+verify_jwt = false
