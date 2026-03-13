@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AIResponse from '@/components/AIResponse';
+import LanguageSelector from '@/components/LanguageSelector';
 import { useAIStream } from '@/hooks/useAIStream';
 
 const fadeUp = {
@@ -36,17 +37,18 @@ const sharedValues = [
 ];
 
 export default function UnderstandingPage() {
+  const [language, setLanguage] = useState('en');
   const { response, isLoading, error, query: aiQuery } = useAIStream();
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
 
   const handleExplore = (label: string) => {
     setActiveLabel(label);
-    aiQuery({ query: label, mode: 'topic' });
+    aiQuery({ query: label, mode: 'topic', language });
   };
 
   const handleValueClick = (title: string) => {
     setActiveLabel(title);
-    aiQuery({ query: `${title} — How do Christianity, Islam, Judaism, and Ethiopian Orthodox Christianity teach about ${title.toLowerCase()}? Include relevant scripture references.`, mode: 'topic' });
+    aiQuery({ query: `${title} — How do Christianity, Islam, Judaism, and Ethiopian Orthodox Christianity teach about ${title.toLowerCase()}? Include relevant scripture references.`, mode: 'topic', language });
   };
 
   return (
@@ -62,6 +64,10 @@ export default function UnderstandingPage() {
             Click any topic below for a detailed AI-powered explanation.
           </p>
         </motion.div>
+
+        <div className="flex justify-center mb-6">
+          <LanguageSelector value={language} onChange={setLanguage} />
+        </div>
 
         <div className="gold-divider mb-8" />
 

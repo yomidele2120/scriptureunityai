@@ -7,6 +7,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const LANGUAGE_MAP: Record<string, string> = {
+  en: "English",
+  ar: "Arabic",
+  he: "Hebrew",
+  yo: "Yoruba",
+  ha: "Hausa",
+  fr: "French",
+  am: "Amharic",
+};
+
 const SYSTEM_PROMPT = `You are a scholarly, neutral, and highly knowledgeable AI specializing in comparative religion. You cover Christianity, Islam, Judaism, and Ethiopian Orthodox Christianity.
 
 CORE RULES:
@@ -38,7 +48,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, mode, topic, religions } = await req.json();
+    const { query, mode, topic, religions, language } = await req.json();
 
     if (!query) {
       return new Response(JSON.stringify({ error: "Query is required" }), {
@@ -54,7 +64,6 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // Extract potential keywords for DB search
       const keywords = query
         .replace(/[^\w\s]/g, "")
         .split(/\s+/)
@@ -108,6 +117,13 @@ serve(async (req) => {
       console.log("DB lookup optional, continuing:", e);
     }
 
+    // Language instruction
+    const langName = LANGUAGE_MAP[language] || "English";
+    const langInstruction =
+      language && language !== "en"
+        ? `\n\nIMPORTANT: Respond entirely in ${langName}. Keep scripture references accurate but provide translations/explanations in ${langName}.`
+        : "";
+
     // Build the user prompt based on mode
     let userPrompt = query;
     if (mode === "topic") {
@@ -134,13 +150,35 @@ Structure your response with:
 ## Similarities and Differences
 (summary)`;
     } else if (mode === "debate") {
-      userPrompt = `Address this theological question from multiple perspectives: "${query}". Present how each Abrahamic faith (Christianity, Islam, Judaism, Ethiopian Orthodox Christianity) answers this question, with scripture references and scholarly context. Remain completely neutral.`;
+      userPrompt = `Address this theological question from multiple perspectives: "${query}".
+
+Present each perspective as a structured argument:
+
+## Christian Perspective
+(argument with Bible references)
+
+## Muslim Perspective
+(argument with Quran/Hadith references)
+
+## Jewish Perspective
+(argument with Torah/Tanakh references)
+
+## Historical / Academic Perspective
+(neutral scholarly analysis)
+
+## Summary
+(balanced conclusion)
+
+Remain completely neutral and present each viewpoint fairly.`;
     } else if (mode === "scripture") {
       userPrompt = `Explain the following scripture or religious reference in detail: "${query}". Include the original text/reference, its context, theological interpretation, and how it relates to similar passages in other Abrahamic traditions.`;
     }
 
     if (dbContext) {
       userPrompt += dbContext;
+    }
+    if (langInstruction) {
+      userPrompt += langInstruction;
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -170,24 +208,14 @@ Structure your response with:
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({
-            error: "Rate limit exceeded. Please try again in a moment.",
-          }),
-          {
-            status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
+          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({
-            error: "AI service credits exhausted. Please add funds.",
-          }),
-          {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
+          JSON.stringify({ error: "AI service credits exhausted. Please add funds." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const t = await response.text();
@@ -204,13 +232,8 @@ Structure your response with:
   } catch (e) {
     console.error("religious-ai error:", e);
     return new Response(
-      JSON.stringify({
-        error: e instanceof Error ? e.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

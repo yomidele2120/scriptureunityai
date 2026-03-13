@@ -16,6 +16,7 @@ export function useAIStream(options?: UseAIStreamOptions) {
     query: string;
     mode?: 'search' | 'topic' | 'compare' | 'debate' | 'scripture';
     religions?: string[];
+    language?: string;
   }) => {
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -110,10 +111,16 @@ export function useAIStream(options?: UseAIStreamOptions) {
     }
   }, [options]);
 
+  const setManualResponse = useCallback((text: string) => {
+    setResponse(text);
+    setError(null);
+    setIsLoading(false);
+  }, []);
+
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     setIsLoading(false);
   }, []);
 
-  return { response, isLoading, error, query, cancel };
+  return { response, isLoading, error, query, cancel, setManualResponse };
 }
