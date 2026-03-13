@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown';
 import { Loader2 } from 'lucide-react';
+import AudioPlayer from '@/components/AudioPlayer';
 
 interface AIResponseProps {
   content: string;
@@ -57,6 +58,9 @@ export default function AIResponse({ content, isLoading, error, placeholder }: A
           <Loader2 className="h-3 w-3 animate-spin text-accent" />
           <span className="text-xs text-muted-foreground">Still generating...</span>
         </div>
+      )}
+      {!isLoading && content && (
+        <AudioPlayer text={content} />
       )}
     </div>
   );

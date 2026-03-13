@@ -92,6 +92,30 @@ export type Database = {
         }
         Relationships: []
       }
+      search_history: {
+        Row: {
+          anon_id: string
+          created_at: string
+          id: string
+          query: string
+          response: string
+        }
+        Insert: {
+          anon_id: string
+          created_at?: string
+          id?: string
+          query: string
+          response: string
+        }
+        Update: {
+          anon_id?: string
+          created_at?: string
+          id?: string
+          query?: string
+          response?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

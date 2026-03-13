@@ -3,11 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import TopicCard from '@/components/TopicCard';
 import AIResponse from '@/components/AIResponse';
+import LanguageSelector from '@/components/LanguageSelector';
 import { useAIStream } from '@/hooks/useAIStream';
 import { topics } from '@/data/mockScriptures';
 
 export default function TopicsPage() {
   const { topicId } = useParams();
+  const [language, setLanguage] = useState('en');
   const { response, isLoading, error, query: aiQuery } = useAIStream();
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
 
@@ -17,20 +19,23 @@ export default function TopicsPage() {
 
     const handleTopicExplore = () => {
       setActiveSubtopic(null);
-      aiQuery({ query: `${topic.name}: ${topic.description}`, mode: 'topic' });
+      aiQuery({ query: `${topic.name}: ${topic.description}`, mode: 'topic', language });
     };
 
     const handleSubtopicClick = (subName: string) => {
       setActiveSubtopic(subName);
-      aiQuery({ query: `${subName} in the context of ${topic.name}`, mode: 'topic' });
+      aiQuery({ query: `${subName} in the context of ${topic.name}`, mode: 'topic', language });
     };
 
     return (
       <div className="min-h-screen py-8">
         <div className="container max-w-4xl">
-          <Link to="/topics" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="h-4 w-4" /> All topics
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link to="/topics" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" /> All topics
+            </Link>
+            <LanguageSelector value={language} onChange={setLanguage} />
+          </div>
           <div className="mb-6">
             <span className="text-3xl mb-2 block">{topic.icon}</span>
             <h1 className="font-heading text-3xl font-bold text-foreground">{topic.name}</h1>
