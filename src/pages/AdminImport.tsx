@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -159,6 +160,18 @@ function parseQuranCSV(csvText: string): QuranVerse[] {
 type ImportType = 'bible' | 'quran';
 
 export default function AdminImport() {
+  return (
+    <>
+      <Helmet>
+        <title>Admin Import — Scripture Unity AI</title>
+        <meta name="description" content="Admin page for importing scripture data into the database." />
+      </Helmet>
+      <AdminImportContent />
+    </>
+  );
+}
+
+function AdminImportContent() {
   const [status, setStatus] = useState('');
   const [progress, setProgress] = useState(0);
   const [total, setTotal] = useState(0);

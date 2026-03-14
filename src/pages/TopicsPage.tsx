@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -28,7 +29,12 @@ export default function TopicsPage() {
     };
 
     return (
-      <div className="min-h-screen py-8">
+      <>
+        <Helmet>
+          <title>Topic Details — Scripture Unity AI</title>
+          <meta name="description" content="Explore religious topics with AI-driven context and comparative scripture insights." />
+        </Helmet>
+        <div className="min-h-screen py-8">
         <div className="container max-w-4xl">
           <div className="flex items-center justify-between mb-6">
             <Link to="/topics" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -80,7 +86,12 @@ export default function TopicsPage() {
   }
 
   return (
-    <div className="min-h-screen py-8">
+    <>
+      <Helmet>
+        <title>Topic Explorer — Scripture Unity AI</title>
+        <meta name="description" content="Browse subjects across sacred texts and uncover shared themes with AI-powered insights." />
+      </Helmet>
+      <div className="min-h-screen py-8">
       <div className="container max-w-5xl">
         <h1 className="font-heading text-3xl font-bold text-foreground mb-2 text-center">Topic Explorer</h1>
         <p className="text-muted-foreground text-center mb-8">Browse topics across traditions — click any topic to get AI-powered explanations</p>

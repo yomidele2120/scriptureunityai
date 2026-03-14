@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { History, X } from 'lucide-react';
@@ -41,7 +42,12 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <>
+      <Helmet>
+        <title>Search Scripture — Scripture Unity AI</title>
+        <meta name="description" content="Search across religious texts with AI powered relevance and comparative scripture context." />
+      </Helmet>
+      <div className="min-h-screen py-8">
       <div className="container max-w-4xl">
         <h1 className="font-heading text-3xl font-bold text-foreground mb-6 text-center">
           Scripture Search

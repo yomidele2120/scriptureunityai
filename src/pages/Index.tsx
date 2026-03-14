@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import SearchBar from '@/components/SearchBar';
 import TopicCard from '@/components/TopicCard';
@@ -11,7 +12,15 @@ const fadeUp = {
 
 export default function Index() {
   return (
-    <div className="min-h-screen">
+    <>
+      <Helmet>
+        <title>Scripture Unity AI – Compare Scriptures and Promote Oneness</title>
+        <meta
+          name="description"
+          content="Explore AI-powered scripture comparison, listen to audio teachings, and discover insights promoting unity and oneness."
+        />
+      </Helmet>
+      <div className="min-h-screen">
       {/* Hero */}
       <section className="py-16 md:py-24 text-center">
         <div className="container max-w-3xl">

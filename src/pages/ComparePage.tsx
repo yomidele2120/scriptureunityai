@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AIResponse from '@/components/AIResponse';
@@ -83,7 +84,12 @@ export default function ComparePage() {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <>
+      <Helmet>
+        <title>Compare & Debate — Scripture Unity AI</title>
+        <meta name="description" content="Compare religious texts and build unified understanding with AI-backed debate mode." />
+      </Helmet>
+      <div className="min-h-screen py-8">
       <div className="container max-w-5xl">
         <motion.div {...fadeUp} transition={{ duration: 0.5 }}>
           <h1 className="font-heading text-3xl font-bold text-foreground mb-2 text-center">

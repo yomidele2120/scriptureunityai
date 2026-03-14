@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AIResponse from '@/components/AIResponse';
@@ -52,7 +53,12 @@ export default function UnderstandingPage() {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <>
+      <Helmet>
+        <title>Understanding Faiths — Scripture Unity AI</title>
+        <meta name="description" content="Deeply explore Christianity, Islam, Judaism, and Ethiopian Orthodox traditions with AI-assisted scripture study." />
+      </Helmet>
+      <div className="min-h-screen py-8">
       <div className="container max-w-4xl">
         <motion.div {...fadeUp} transition={{ duration: 0.5 }} className="text-center mb-10">
           <span className="text-4xl mb-3 block">🕊</span>
