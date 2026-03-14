@@ -82,6 +82,7 @@ export default function TopicsPage() {
           />
         </div>
       </div>
+    </>
     );
   }
 
@@ -102,5 +103,6 @@ export default function TopicsPage() {
         </div>
       </div>
     </div>
+  </>
   );
 }
