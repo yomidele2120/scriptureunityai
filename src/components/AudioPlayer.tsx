@@ -93,10 +93,13 @@ export default function AudioPlayer({ text }: AudioPlayerProps) {
 
     utterance.onerror = (e) => {
       if (e.error === 'canceled' || e.error === 'interrupted') return;
-      console.error('TTS chunk error:', e.error);
-      // Try next chunk on error
-      spokenCharsRef.current += chunk.length;
-      speakChunk(index + 1);
+      console.error('TTS error:', e.error);
+      // Stop entirely on synthesis failure (no voices available)
+      cancelledRef.current = true;
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      setIsLoading(false);
+      setProgress(0);
     };
 
     window.speechSynthesis.speak(utterance);
