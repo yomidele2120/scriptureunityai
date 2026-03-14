@@ -184,6 +184,18 @@ export const topics: Topic[] = [
     ],
   },
   {
+    id: 't10',
+    name: 'Misunderstood Concepts',
+    description: 'Clarifying commonly misunderstood religious concepts with scholarly context.',
+    icon: '🔍',
+    subtopics: [
+      { id: 's32', name: 'Jihad' },
+      { id: 's33', name: 'Trinity' },
+      { id: 's34', name: 'Crucifixion' },
+      { id: 's35', name: 'Religious Law' },
+    ],
+  },
+  {
     id: 't2',
     name: 'Prophets and Messengers',
     description: 'Study the prophets recognized across the Abrahamic traditions.',
@@ -273,18 +285,6 @@ export const topics: Topic[] = [
       { id: 's29', name: 'Paradise and Heaven' },
       { id: 's30', name: 'Day of Judgment' },
       { id: 's31', name: 'Resurrection' },
-    ],
-  },
-  {
-    id: 't10',
-    name: 'Misunderstood Concepts',
-    description: 'Clarifying commonly misunderstood religious concepts with scholarly context.',
-    icon: '🔍',
-    subtopics: [
-      { id: 's32', name: 'Jihad' },
-      { id: 's33', name: 'Trinity' },
-      { id: 's34', name: 'Crucifixion' },
-      { id: 's35', name: 'Religious Law' },
     ],
   },
 ];
