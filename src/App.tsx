@@ -56,6 +56,8 @@ const App = () => (
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/understanding" element={<UnderstandingPage />} />
           <Route path="/read/:type" element={<ScriptureReaderPage />} />
+          <Route path="/read/:type/:bookSlug" element={<ScriptureReaderPage />} />
+          <Route path="/read/:type/:bookSlug/:chapter" element={<ScriptureReaderPage />} />
           <Route path="/admin/import" element={<AdminImport />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
