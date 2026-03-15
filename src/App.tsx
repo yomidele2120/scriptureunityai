@@ -12,6 +12,8 @@ import TopicsPage from "./pages/TopicsPage";
 import ComparePage from "./pages/ComparePage";
 import UnderstandingPage from "./pages/UnderstandingPage";
 import ScriptureReaderPage from "./pages/ScriptureReaderPage";
+import QueryDetailPage from "./pages/QueryDetailPage";
+import TopicDetailPage from "./pages/TopicDetailPage";
 import NotFound from "./pages/NotFound";
 import AdminImport from "./pages/AdminImport";
 
@@ -47,6 +49,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/results" element={<SearchResultsPage />} />
+          <Route path="/query/:queryId" element={<QueryDetailPage />} />
+          <Route path="/topic/:topicSlug" element={<TopicDetailPage />} />
           <Route path="/topics" element={<TopicsPage />} />
           <Route path="/topics/:topicId" element={<TopicsPage />} />
           <Route path="/compare" element={<ComparePage />} />

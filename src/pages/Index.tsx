@@ -52,13 +52,13 @@ export default function Index() {
 
         <div className="gold-divider" />
 
-        {/* Interactive AI Demo */}
-        <LandingDemo />
+        {/* Scripture Reading Section */}
+        <ScriptureReadingSection />
 
         <div className="gold-divider" />
 
-        {/* Scripture Reading Section */}
-        <ScriptureReadingSection />
+        {/* Interactive AI Demo */}
+        <LandingDemo />
 
         <div className="gold-divider" />
 
