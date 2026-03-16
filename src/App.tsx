@@ -58,6 +58,9 @@ const App = () => (
           <Route path="/read/:type" element={<ScriptureReaderPage />} />
           <Route path="/read/:type/:bookSlug" element={<ScriptureReaderPage />} />
           <Route path="/read/:type/:bookSlug/:chapter" element={<ScriptureReaderPage />} />
+          <Route path="/scripture/:type" element={<ScriptureReaderPage />} />
+          <Route path="/scripture/:type/:bookSlug" element={<ScriptureReaderPage />} />
+          <Route path="/scripture/:type/:bookSlug/:chapter" element={<ScriptureReaderPage />} />
           <Route path="/admin/import" element={<AdminImport />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
