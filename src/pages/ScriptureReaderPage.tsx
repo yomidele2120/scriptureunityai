@@ -362,9 +362,9 @@ export default function ScriptureReaderPage() {
 
                 {!isLoading && !error && !aiMainText && fallbackChapterContent.length > 0 && (
                   <div className="space-y-4">
-                    {showVerseOnly ? fallbackChapterContent
+                    {showVerseOnly ? (fallbackChapterContent as any[])
                       .filter((item) => item.verse === showVerseOnly || item.ayah === showVerseOnly)
-                      .map((item) => (
+                      .map((item: any) => (
                         type === 'quran' ? (
                           <article key={item.ayah} className="space-y-1">
                             <div className="font-arabic text-right">{item.ayah}. {item.arabicText}</div>
@@ -377,6 +377,7 @@ export default function ScriptureReaderPage() {
                           </article>
                         )
                       ))
+
                       : type === 'quran' ? (
                         quranVerseGroups.map((group, groupIndex) => (
                           <section key={`group-${groupIndex}`} className="space-y-3">

@@ -21,8 +21,8 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
       return new Response(
         JSON.stringify({ error: "TTS service not configured" }),
         {
@@ -32,33 +32,42 @@ serve(async (req) => {
       );
     }
 
-    // Truncate to 4096 chars (OpenAI TTS limit)
-    const truncatedText = text.slice(0, 4096);
+    // Conservative cap; Lovable AI gateway forwards to provider.
+    const truncatedText = text.slice(0, 4000);
 
-    const response = await fetch("https://api.openai.com/v1/audio/speech", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini-tts",
+        model: "openai/gpt-4o-mini-tts",
         input: truncatedText,
-        voice: voice || "nova",
+        voice: voice || "alloy",
         speed: speed || 1.0,
         response_format: "mp3",
       }),
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenAI TTS error:", response.status, errText);
+      const errText = await response.text().catch(() => "");
+      console.error("Lovable TTS error:", response.status, errText);
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "AI credits depleted. Please add credits to use audio narration." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit reached. Try again in a moment." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       return new Response(
         JSON.stringify({ error: "Text-to-speech generation failed" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

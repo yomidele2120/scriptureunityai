@@ -87,20 +87,18 @@ export default function DailyVerseOfTheDay() {
   }, [dateKey]);
 
   const copyToClipboard = async (data: DailyVerseData) => {
-    const verse = data.verse;
     const textToCopy = data.source === 'quran'
-      ? `${verse.surahName} ${verse.surah}:${verse.ayah}\n${verse.arabicText}\n${verse.englishText}`
-      : `${verse.book} ${verse.chapter}:${verse.verse}\n${verse.text}`;
+      ? `${data.verse.surahName} ${data.verse.surah}:${data.verse.ayah}\n${data.verse.arabicText}\n${data.verse.englishText}`
+      : `${data.verse.book} ${data.verse.chapter}:${data.verse.verse}\n${data.verse.text}`;
 
     await navigator.clipboard.writeText(textToCopy);
     window.alert('Verse copied to clipboard');
   };
 
   const shareVerse = async (data: DailyVerseData) => {
-    const verse = data.verse;
     const textToShare = data.source === 'quran'
-      ? `${verse.surahName} ${verse.surah}:${verse.ayah} - ${verse.englishText}`
-      : `${verse.book} ${verse.chapter}:${verse.verse} - ${verse.text}`;
+      ? `${data.verse.surahName} ${data.verse.surah}:${data.verse.ayah} - ${data.verse.englishText}`
+      : `${data.verse.book} ${data.verse.chapter}:${data.verse.verse} - ${data.verse.text}`;
 
     if (navigator.share) {
       await navigator.share({ title: 'Verse of the Day', text: textToShare, url: window.location.href });
@@ -108,6 +106,7 @@ export default function DailyVerseOfTheDay() {
       await copyToClipboard(data);
     }
   };
+
 
   if (!loaded) {
     return (
@@ -126,11 +125,10 @@ export default function DailyVerseOfTheDay() {
         <div className="grid gap-4 md:grid-cols-3">
           {(Object.keys(dailyVerses) as VerseSource[]).map((source) => {
             const data = dailyVerses[source];
-            const verse = data.verse;
 
-            const subtitle = source === 'quran'
-              ? `Surah ${verse.surahName} ${verse.surah}:${verse.ayah}`
-              : `${verse.book} ${verse.chapter}:${verse.verse}`;
+            const subtitle = data.source === 'quran'
+              ? `Surah ${data.verse.surahName} ${data.verse.surah}:${data.verse.ayah}`
+              : `${data.verse.book} ${data.verse.chapter}:${data.verse.verse}`;
 
             return (
               <div key={source} className="rounded-xl border border-border bg-card p-5">
@@ -147,7 +145,8 @@ export default function DailyVerseOfTheDay() {
                 <h3 className="text-sm font-bold text-primary mb-1">{subtitle}</h3>
                 <div className="mb-3 text-sm text-muted-foreground">{dateKey}</div>
 
-                <VerseCard data={{ type: source, verse }} />
+                <VerseCard data={{ type: data.source, verse: data.verse } as React.ComponentProps<typeof VerseCard>['data']} />
+
 
                 <div className="mt-4 flex items-center justify-between">
                   <Link to={toReadPath(source)} className="text-primary hover:underline text-sm">
