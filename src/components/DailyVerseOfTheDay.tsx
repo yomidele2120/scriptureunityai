@@ -125,11 +125,10 @@ export default function DailyVerseOfTheDay() {
         <div className="grid gap-4 md:grid-cols-3">
           {(Object.keys(dailyVerses) as VerseSource[]).map((source) => {
             const data = dailyVerses[source];
-            const verse = data.verse;
 
-            const subtitle = source === 'quran'
-              ? `Surah ${verse.surahName} ${verse.surah}:${verse.ayah}`
-              : `${verse.book} ${verse.chapter}:${verse.verse}`;
+            const subtitle = data.source === 'quran'
+              ? `Surah ${data.verse.surahName} ${data.verse.surah}:${data.verse.ayah}`
+              : `${data.verse.book} ${data.verse.chapter}:${data.verse.verse}`;
 
             return (
               <div key={source} className="rounded-xl border border-border bg-card p-5">
@@ -146,7 +145,8 @@ export default function DailyVerseOfTheDay() {
                 <h3 className="text-sm font-bold text-primary mb-1">{subtitle}</h3>
                 <div className="mb-3 text-sm text-muted-foreground">{dateKey}</div>
 
-                <VerseCard data={{ type: source, verse }} />
+                <VerseCard data={{ type: data.source, verse: data.verse } as React.ComponentProps<typeof VerseCard>['data']} />
+
 
                 <div className="mt-4 flex items-center justify-between">
                   <Link to={toReadPath(source)} className="text-primary hover:underline text-sm">
